@@ -22,6 +22,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/user", async (req, res) => {
+      const email = req.query.email;
+      const query = { userEmail: email };
+      const result = await usersCollection.findOne(query);
+      res.send({ result });
+    });
+
   }
   finally {
 
