@@ -36,6 +36,18 @@ async function run() {
     const usersCollection = client.db("thriftStore").collection("users");
     const categoriesCollection = client.db("thriftStore").collection("categories");
 
+    const verifyAdmin = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const filter = { userEmail: decodedEmail };
+      const user = await usersCollection.findOne(filter);
+
+      if (user.userType !== "admin") {
+        return res.status(401).send({ message: "Unauthorized access. User is not admin" });
+      }
+
+      next();
+    };
+
     app.post("/user", async (req, res) => {
       const user = req.body;
       const email = user.userEmail;
@@ -87,7 +99,7 @@ async function run() {
       res.send({ result });
     });
 
-    app.post("/categories", async (req, res) => {
+    app.post("/categories", verifyJWT, verifyAdmin, async (req, res) => {
       const category = req.body;
       const result = await categoriesCollection.insertOne(category);
       res.send(result);
