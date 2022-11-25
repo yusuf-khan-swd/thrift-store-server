@@ -34,6 +34,7 @@ const verifyJWT = (req, res, next) => {
 async function run() {
   try {
     const usersCollection = client.db("thriftStore").collection("users");
+    const categoriesCollection = client.db("thriftStore").collection("categories");
 
     app.post("/user", async (req, res) => {
       const user = req.body;
@@ -84,6 +85,12 @@ async function run() {
       const filter = { userEmail: decodedEmail };
       const result = await usersCollection.findOne(filter);
       res.send({ result });
+    });
+
+    app.post("/categories", async (req, res) => {
+      const category = req.body;
+      const result = await categoriesCollection.insertOne(category);
+      res.send(result);
     });
 
   }
