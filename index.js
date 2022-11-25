@@ -48,6 +48,17 @@ async function run() {
       next();
     };
 
+    const verifySeller = async (req, res, next) => {
+      const decodedEmail = req.decoded.email;
+      const filter = { userEmail: decodedEmail };
+      const user = await usersCollection.findOne(filter);
+
+      if (user.userType !== "seller") {
+        return res.status(401).send({ message: "Unauthorized access. User is not Seller" });
+      }
+      next();
+    };
+
     app.post("/user", async (req, res) => {
       const user = req.body;
       const email = user.userEmail;
