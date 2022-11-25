@@ -35,6 +35,7 @@ async function run() {
   try {
     const usersCollection = client.db("thriftStore").collection("users");
     const categoriesCollection = client.db("thriftStore").collection("categories");
+    const productsCollection = client.db("thriftStore").collection("products");
 
     const verifyAdmin = async (req, res, next) => {
       const decodedEmail = req.decoded.email;
@@ -113,6 +114,12 @@ async function run() {
     app.post("/categories", verifyJWT, verifyAdmin, async (req, res) => {
       const category = req.body;
       const result = await categoriesCollection.insertOne(category);
+      res.send(result);
+    });
+
+    app.get("/categories", async (req, res) => {
+      const query = {};
+      const result = await categoriesCollection.find(query).toArray();
       res.send(result);
     });
 
