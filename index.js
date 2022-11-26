@@ -137,12 +137,13 @@ async function run() {
     });
 
     app.put("/products/:id", verifyJWT, verifySeller, async (req, res) => {
+      const advertise = req.body.advertise;
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
-          advertised: true
+          advertised: !advertise
         }
       }
 
