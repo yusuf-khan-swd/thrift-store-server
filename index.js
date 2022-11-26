@@ -98,7 +98,7 @@ async function run() {
       res.send({ token });
     });
 
-    app.get("/accountType", verifyJWT, async (req, res) => {
+    app.get("/userType", verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
       const email = req.query.email;
 
