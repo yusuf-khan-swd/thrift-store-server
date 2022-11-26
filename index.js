@@ -123,6 +123,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/category/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { categoryId: id };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
     app.post("/products", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
