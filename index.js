@@ -182,6 +182,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/all-buyers", async (req, res) => {
+      const filter = { userType: "buyer" };
+      const result = await usersCollection.find(filter).toArray();
+      res.send(result);
+    });
+
   }
   finally {
 
