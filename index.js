@@ -158,6 +158,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/all-sellers", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = { userType: 'seller' };
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
   }
   finally {
 
