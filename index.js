@@ -136,7 +136,7 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/products/:id", async (req, res) => {
+    app.put("/products/:id", verifyJWT, verifySeller, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
@@ -147,6 +147,13 @@ async function run() {
       }
 
       const result = await productsCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
+
+    app.delete("/products/:id", verifyJWT, verifySeller, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(filter);
       res.send(result);
     });
 
