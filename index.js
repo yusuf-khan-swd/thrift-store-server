@@ -129,6 +129,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/products", verifyJWT, verifySeller, async (req, res) => {
+      const email = req.query.email;
+      const query = { sellerEmail: email };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
   }
   finally {
 
