@@ -192,6 +192,17 @@ async function run() {
         }
       }
 
+      const email = req.query.email;
+      const query = { sellerEmail: email };
+      const option = { upsert: true };
+      const updateDoc = {
+        $set: {
+          sellerIsVerified: !isVerified
+        }
+      };
+
+      await productsCollection.updateMany(query, updateDoc, option);
+
       const result = await usersCollection.updateOne(filter, updatedDoc, options);
       res.send(result);
     })
