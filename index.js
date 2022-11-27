@@ -130,20 +130,20 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/products", verifyJWT, verifySeller, async (req, res) => {
+    app.post("/seller-product", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
       res.send(result);
     });
 
-    app.get("/products", verifyJWT, verifySeller, async (req, res) => {
+    app.get("/seller-products", verifyJWT, verifySeller, async (req, res) => {
       const email = req.query.email;
       const query = { sellerEmail: email };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
 
-    app.put("/products/:id", verifyJWT, verifySeller, async (req, res) => {
+    app.put("/seller-product/:id", verifyJWT, verifySeller, async (req, res) => {
       const advertise = req.body.advertise;
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
@@ -158,7 +158,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/products/:id", verifyJWT, verifySeller, async (req, res) => {
+    app.delete("/seller-product/:id", verifyJWT, verifySeller, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await productsCollection.deleteOne(filter);
