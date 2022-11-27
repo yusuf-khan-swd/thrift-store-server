@@ -36,6 +36,7 @@ async function run() {
     const usersCollection = client.db("thriftStore").collection("users");
     const categoriesCollection = client.db("thriftStore").collection("categories");
     const productsCollection = client.db("thriftStore").collection("products");
+    const ordersCollection = client.db("thriftStore").collection("orders");
 
     const verifyAdmin = async (req, res, next) => {
       const decodedEmail = req.decoded.email;
@@ -60,7 +61,7 @@ async function run() {
       next();
     };
 
-    app.post("/user", async (req, res) => {
+    app.post("/users", async (req, res) => {
       const user = req.body;
       const email = user.userEmail;
 
@@ -84,7 +85,7 @@ async function run() {
 
     });
 
-    app.get("/user", async (req, res) => {
+    app.get("/users", async (req, res) => {
       const email = req.query.email;
       const query = { userEmail: email };
       const result = await usersCollection.findOne(query);
@@ -98,7 +99,7 @@ async function run() {
       res.send({ token });
     });
 
-    app.get("/userType", verifyJWT, async (req, res) => {
+    app.get("/usersType", verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
       const email = req.query.email;
 
