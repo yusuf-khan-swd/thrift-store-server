@@ -216,7 +216,7 @@ async function run() {
     })
 
     app.get("/advertised", async (req, res) => {
-      const query = { advertised: true };
+      const query = { advertised: true, saleStatus: "available" };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
