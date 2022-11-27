@@ -254,12 +254,21 @@ async function run() {
     });
 
     app.put("/reported-products/:id", verifyJWT, async (req, res) => {
+      const reported = req.body.reported;
+      let isReported = "";
+      if (reported) {
+        isReported = true;
+      }
+      else {
+        isReported = false
+      }
+
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
-          reported: true
+          reported: !isReported
         }
       }
 
