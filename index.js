@@ -242,7 +242,7 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/products/:id", async (req, res) => {
+    app.put("/products/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
