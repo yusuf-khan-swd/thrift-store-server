@@ -256,6 +256,12 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/reports", verifyJWT, verifyAdmin, async (req, res) => {
+      const query = { reported: true };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
   }
   finally {
 
