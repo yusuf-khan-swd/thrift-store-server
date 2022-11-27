@@ -215,6 +215,12 @@ async function run() {
       res.send(result);
     })
 
+    app.get("/advertised", async (req, res) => {
+      const query = { advertised: true };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
   }
   finally {
 
