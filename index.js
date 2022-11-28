@@ -245,7 +245,14 @@ async function run() {
       const query = { buyerEmail: decodedEmail };
       const result = await ordersCollection.find(query).toArray();
       res.send(result);
-    })
+    });
+
+    app.get("/orders/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await ordersCollection.findOne(query);
+      res.send(result);
+    });
 
     app.delete("/orders/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
@@ -290,15 +297,8 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/products/:id", verifyJWT, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await productsCollection.findOne(query);
-      res.send(result);
-    });
-
     app.post("/create-payment-intent", async (req, res) => {
-      const price = req.body.resalePrice;
+      const price = req.body.productPrice;
       const amount = price * 100;
 
       const paymentIntent = await stripe.paymentIntents.create({
