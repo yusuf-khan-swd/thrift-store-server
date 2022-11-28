@@ -38,6 +38,7 @@ async function run() {
     const categoriesCollection = client.db("thriftStore").collection("categories");
     const productsCollection = client.db("thriftStore").collection("products");
     const ordersCollection = client.db("thriftStore").collection("orders");
+    const paymentsCollection = client.db("thriftStore").collection("payments");
 
     const verifyAdmin = async (req, res, next) => {
       const decodedEmail = req.decoded.email;
@@ -314,6 +315,33 @@ async function run() {
       })
 
     });
+
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      const { orderId, productId } = payment;
+
+      const filterOne = { _id: ObjectId(orderId) };
+      const optionOne = { upsert: true };
+      const updatedDocOne = {
+        $set: {
+          saleStatus: "paid"
+        }
+      }
+      await ordersCollection.updateOne(filterOne, updatedDocOne, optionOne);
+
+      const filterTwo = { _id: ObjectId(productId) };
+      const optionTwo = { upsert: true };
+      const updatedDocTwo = {
+        $set: {
+          saleStatus: "paid"
+        }
+      }
+      await productsCollection.updateOne(filterTwo, updatedDocTwo, optionTwo);
+
+      const result = await paymentsCollection.insertOne(payment);
+      res.send(result);
+    });
+
 
   }
   finally {
