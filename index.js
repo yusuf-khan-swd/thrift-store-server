@@ -134,6 +134,10 @@ async function run() {
     });
 
     app.delete("/categories/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const categoryName = req.query.categoryName;
+      const query = { productCategory: categoryName };
+      await productsCollection.deleteMany(query);
+
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const result = await categoriesCollection.deleteOne(filter);
