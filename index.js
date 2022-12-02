@@ -133,6 +133,13 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/categories/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await categoriesCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     app.post("/seller-product", verifyJWT, verifySeller, async (req, res) => {
       const product = req.body;
       const result = await productsCollection.insertOne(product);
