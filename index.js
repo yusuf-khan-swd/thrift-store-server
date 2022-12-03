@@ -94,7 +94,7 @@ async function run() {
       res.send({ result });
     });
 
-    app.put("/users", async (req, res) => {
+    app.put("/users", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: ObjectId(id) };
       const options = { upsert: true };
