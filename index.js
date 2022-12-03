@@ -254,6 +254,19 @@ async function run() {
       res.send(result);
     })
 
+    app.get("/all-admins", verifyJWT, verifyAdmin, async (req, res) => {
+      const filter = { userType: "admin" };
+      const result = await usersCollection.find(filter).toArray();
+      res.send(result);
+    });
+
+    app.delete("/all-admins/:id", verifyJWT, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     app.get("/advertised", async (req, res) => {
       const query = { advertised: true, saleStatus: "available" };
       const result = await productsCollection.find(query).toArray();
