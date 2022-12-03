@@ -94,6 +94,20 @@ async function run() {
       res.send({ result });
     });
 
+    app.put("/users", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updatedDoc = {
+        $set: {
+          userType: "admin"
+        }
+      }
+
+      const result = await usersCollection.updateOne(filter, updatedDoc, options);
+      res.send(result);
+    });
+
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
       console.log(email);
