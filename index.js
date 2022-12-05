@@ -300,6 +300,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/ordered-products", verifyJWT, verifySeller, async (req, res) => {
+      const email = req.query.email;
+      const filter = { sellerEmail: email };
+      const result = await ordersCollection.find(filter).toArray();
+      res.send(result);
+    });
+
     app.put("/reported-products/:id", verifyJWT, async (req, res) => {
       const reported = req.body.reported;
       let isReported = "";
