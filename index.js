@@ -108,6 +108,14 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/users", verifyJWT, async (req, res) => {
+      const email = req.query.email;
+
+      const filter = { userEmail: email };
+      const result = await usersCollection.deleteOne(filter);
+      res.send(result);
+    });
+
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
       console.log(email);
