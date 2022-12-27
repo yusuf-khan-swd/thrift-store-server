@@ -108,7 +108,7 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/users", verifyJWT, async (req, res) => {
+    app.delete("/users", async (req, res) => {
       const email = req.query.email;
 
       const filter = { userEmail: email };
