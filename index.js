@@ -150,9 +150,17 @@ async function run() {
 
     app.get("/category/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
-      const query = { categoryId: id, saleStatus: "available" };
-      const result = await productsCollection.find(query).toArray();
-      res.send(result);
+
+      if (id === "all-products") {
+        const query = { saleStatus: "available" };
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      }
+      else {
+        const query = { categoryId: id, saleStatus: "available" };
+        const result = await productsCollection.find(query).toArray();
+        res.send(result);
+      }
     });
 
     app.delete("/categories/:id", verifyJWT, verifyAdmin, async (req, res) => {
