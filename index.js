@@ -148,7 +148,7 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/category/:id", verifyJWT, async (req, res) => {
+    app.get("/category/:id",  async (req, res) => {
       const id = req.params.id;
 
       if (id === "all-products") {
