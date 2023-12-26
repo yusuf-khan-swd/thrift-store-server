@@ -1,41 +1,50 @@
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const stripe = require("stripe")(process.env.STRIPE_SECRET)
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 const port = process.env.PORT || 5000;
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.tjl9nwy.mongodb.net/?retryWrites=true&w=majority`;
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
-    return res.status(403).send({ message: 'Forbidden access! header is missing' })
+    return res
+      .status(403)
+      .send({ message: "Forbidden access! header is missing" });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
   jwt.verify(token, process.env.ACCESS_TOKEN, function (err, decoded) {
     if (err) {
-      return res.status(401).send({ message: 'Unauthorized access! Token is not valid' });
+      return res
+        .status(401)
+        .send({ message: "Unauthorized access! Token is not valid" });
     }
 
     req.decoded = decoded;
     next();
-  })
+  });
 };
 
 async function run() {
   try {
     const usersCollection = client.db("thriftStore").collection("users");
-    const categoriesCollection = client.db("thriftStore").collection("categories");
+    const categoriesCollection = client
+      .db("thriftStore")
+      .collection("categories");
     const productsCollection = client.db("thriftStore").collection("products");
     const ordersCollection = client.db("thriftStore").collection("orders");
     const paymentsCollection = client.db("thriftStore").collection("payments");
@@ -46,7 +55,9 @@ async function run() {
       const user = await usersCollection.findOne(filter);
 
       if (user.userType !== "admin") {
-        return res.status(401).send({ message: "Unauthorized access. User is not admin" });
+        return res
+          .status(401)
+          .send({ message: "Unauthorized access. User is not admin" });
       }
 
       next();
@@ -58,7 +69,9 @@ async function run() {
       const user = await usersCollection.findOne(filter);
 
       if (user.userType !== "seller") {
-        return res.status(401).send({ message: "Unauthorized access. User is not Seller" });
+        return res
+          .status(401)
+          .send({ message: "Unauthorized access. User is not Seller" });
       }
       next();
     };
@@ -75,16 +88,14 @@ async function run() {
         const result = await usersCollection.insertOne(user);
         return res.send({
           success: true,
-          data: result
+          data: result,
         });
-      }
-      else {
+      } else {
         res.send({
           success: false,
-          message: `${user.userName} you already have an account. Please login`
-        })
+          message: `${user.userName} you already have an account. Please login`,
+        });
       }
-
     });
 
     app.get("/users", async (req, res) => {
@@ -100,11 +111,15 @@ async function run() {
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
-          userType: "admin"
-        }
-      }
+          userType: "admin",
+        },
+      };
 
-      const result = await usersCollection.updateOne(filter, updatedDoc, options);
+      const result = await usersCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -119,7 +134,9 @@ async function run() {
     app.get("/jwt", async (req, res) => {
       const email = req.query.email;
       console.log(email);
-      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, { expiresIn: '7d' })
+      const token = jwt.sign({ email }, process.env.ACCESS_TOKEN, {
+        expiresIn: "7d",
+      });
       res.send({ token });
     });
 
@@ -128,7 +145,9 @@ async function run() {
       const email = req.query.email;
 
       if (email !== decodedEmail) {
-        return res.status(403).send({ message: 'Forbidden access! Email is not matched' });
+        return res
+          .status(403)
+          .send({ message: "Forbidden access! Email is not matched" });
       }
 
       const filter = { userEmail: decodedEmail };
@@ -148,15 +167,14 @@ async function run() {
       res.send(result);
     });
 
-    app.get("/category/:id",  async (req, res) => {
+    app.get("/category/:id", async (req, res) => {
       const id = req.params.id;
 
       if (id === "all-products") {
         const query = { saleStatus: "available" };
         const result = await productsCollection.find(query).toArray();
         res.send(result);
-      }
-      else {
+      } else {
         const query = { categoryId: id, saleStatus: "available" };
         const result = await productsCollection.find(query).toArray();
         res.send(result);
@@ -187,30 +205,44 @@ async function run() {
       res.send(result);
     });
 
-    app.put("/seller-product/:id", verifyJWT, verifySeller, async (req, res) => {
-      const advertise = req.body.advertise;
-      const id = req.params.id;
-      const filter = { _id: ObjectId(id) };
-      const options = { upsert: true };
-      const updatedDoc = {
-        $set: {
-          advertised: !advertise
-        }
+    app.put(
+      "/seller-product/:id",
+      verifyJWT,
+      verifySeller,
+      async (req, res) => {
+        const advertise = req.body.advertise;
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id) };
+        const options = { upsert: true };
+        const updatedDoc = {
+          $set: {
+            advertised: !advertise,
+          },
+        };
+
+        const result = await productsCollection.updateOne(
+          filter,
+          updatedDoc,
+          options
+        );
+        res.send(result);
       }
+    );
 
-      const result = await productsCollection.updateOne(filter, updatedDoc, options);
-      res.send(result);
-    });
-
-    app.delete("/seller-product/:id", verifyJWT, verifySeller, async (req, res) => {
-      const id = req.params.id;
-      const filter = { _id: ObjectId(id) };
-      const result = await productsCollection.deleteOne(filter);
-      res.send(result);
-    });
+    app.delete(
+      "/seller-product/:id",
+      verifyJWT,
+      verifySeller,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: ObjectId(id) };
+        const result = await productsCollection.deleteOne(filter);
+        res.send(result);
+      }
+    );
 
     app.get("/all-sellers", verifyJWT, verifyAdmin, async (req, res) => {
-      const query = { userType: 'seller' };
+      const query = { userType: "seller" };
       const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
@@ -221,8 +253,7 @@ async function run() {
       let isVerified = "";
       if (verified) {
         isVerified = true;
-      }
-      else {
+      } else {
         isVerified = false;
       }
 
@@ -231,24 +262,28 @@ async function run() {
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
-          userIsVerified: !isVerified
-        }
-      }
+          userIsVerified: !isVerified,
+        },
+      };
 
       const email = req.query.email;
       const query = { sellerEmail: email };
       const option = { upsert: true };
       const updateDoc = {
         $set: {
-          sellerIsVerified: !isVerified
-        }
+          sellerIsVerified: !isVerified,
+        },
       };
 
       await productsCollection.updateMany(query, updateDoc, option);
 
-      const result = await usersCollection.updateOne(filter, updatedDoc, options);
+      const result = await usersCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
-    })
+    });
 
     app.delete("/all-sellers/:id", verifyJWT, verifyAdmin, async (req, res) => {
       const id = req.params.id;
@@ -268,7 +303,7 @@ async function run() {
       const filter = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(filter);
       res.send(result);
-    })
+    });
 
     app.get("/all-admins", verifyJWT, verifyAdmin, async (req, res) => {
       const filter = { userType: "admin" };
@@ -328,9 +363,8 @@ async function run() {
       let isReported = "";
       if (reported) {
         isReported = true;
-      }
-      else {
-        isReported = false
+      } else {
+        isReported = false;
       }
 
       const id = req.params.id;
@@ -338,11 +372,15 @@ async function run() {
       const options = { upsert: true };
       const updatedDoc = {
         $set: {
-          reported: !isReported
-        }
-      }
+          reported: !isReported,
+        },
+      };
 
-      const result = await productsCollection.updateOne(filter, updatedDoc, options);
+      const result = await productsCollection.updateOne(
+        filter,
+        updatedDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -352,12 +390,17 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/reported-products/:id", verifyJWT, verifyAdmin, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await productsCollection.deleteOne(query);
-      res.send(result);
-    });
+    app.delete(
+      "/reported-products/:id",
+      verifyJWT,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: ObjectId(id) };
+        const result = await productsCollection.deleteOne(query);
+        res.send(result);
+      }
+    );
 
     app.post("/create-payment-intent", async (req, res) => {
       const price = req.body.productPrice;
@@ -366,15 +409,12 @@ async function run() {
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
-        "payment_method_types": [
-          "card"
-        ],
+        payment_method_types: ["card"],
       });
 
       res.send({
         clientSecret: paymentIntent.client_secret,
-      })
-
+      });
     });
 
     app.post("/payments", async (req, res) => {
@@ -385,30 +425,26 @@ async function run() {
       const optionOne = { upsert: true };
       const updatedDocOne = {
         $set: {
-          saleStatus: "paid"
-        }
-      }
+          saleStatus: "paid",
+        },
+      };
       await ordersCollection.updateOne(filterOne, updatedDocOne, optionOne);
 
       const filterTwo = { _id: ObjectId(productId) };
       const optionTwo = { upsert: true };
       const updatedDocTwo = {
         $set: {
-          saleStatus: "paid"
-        }
-      }
+          saleStatus: "paid",
+        },
+      };
       await productsCollection.updateOne(filterTwo, updatedDocTwo, optionTwo);
 
       const result = await paymentsCollection.insertOne(payment);
       res.send(result);
     });
-
-
+  } finally {
   }
-  finally {
-
-  }
-};
+}
 
 run().catch(console.log);
 
