@@ -1,5 +1,3 @@
-Testing local project connect with github
-
 ## `Useful Links`
 
 **1. [Github Client Side Repository](https://github.com/yusuf-khan-swd/thrift-store-client)** \
